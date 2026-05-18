@@ -1,7 +1,7 @@
 <x-layouts.app heading="Accept Laundry" subheading="Encode walk-in customer laundry details, calculate total, and receive payment">
-    <form method="POST" action="{{ route('orders.store') }}" class="grid grid-2" data-order-form>
+    <form method="POST" action="{{ route('orders.store') }}" class="grid grid-2 order-create-form" data-order-form>
         @csrf
-        <div class="card">
+        <div class="card order-create-card">
             <h2>Customer and Laundry Details</h2>
             <div class="field">
                 <label>Customer Name</label>
@@ -36,13 +36,15 @@
                 <input type="number" step="0.01" min="0.1" name="weight_kg" value="{{ old('weight_kg') }}" data-weight-input required>
                 <div class="muted">1 load covers up to {{ number_format(optional($pricing)->max_kilo_per_load ?? 0, 2) }} kg.</div>
             </div>
-            <div class="field">
-                <label>Price Per Load</label>
-                <input value="PHP {{ number_format(optional($pricing)->price_per_load ?? 0, 2) }}" data-price-per-load="{{ optional($pricing)->price_per_load ?? 0 }}" data-max-kilo-per-load="{{ optional($pricing)->max_kilo_per_load ?? 0 }}" disabled>
-            </div>
-            <div class="field">
-                <label>Estimated Loads</label>
-                <input value="0" data-load-count disabled>
+            <div class="order-create-summary-grid">
+                <div class="field">
+                    <label>Price Per Load</label>
+                    <input value="PHP {{ number_format(optional($pricing)->price_per_load ?? 0, 2) }}" data-price-per-load="{{ optional($pricing)->price_per_load ?? 0 }}" data-max-kilo-per-load="{{ optional($pricing)->max_kilo_per_load ?? 0 }}" disabled>
+                </div>
+                <div class="field">
+                    <label>Estimated Loads</label>
+                    <input value="0" data-load-count disabled>
+                </div>
             </div>
             <div class="field">
                 <label>Notes</label>
@@ -50,10 +52,10 @@
             </div>
         </div>
 
-        <div class="card">
+        <div class="card order-create-card order-create-payment-card">
             <h2>Add-On Services</h2>
             @forelse($addOns as $addOn)
-                <label class="checkbox-row">
+                <label class="checkbox-row order-create-addon">
                     <input type="checkbox" name="add_ons[]" value="{{ $addOn->id }}" data-add-on-price="{{ $addOn->price }}" @checked(in_array($addOn->id, old('add_ons', [])))>
                     <span>{{ $addOn->name }} - PHP {{ number_format($addOn->price, 2) }}</span>
                 </label>
@@ -62,7 +64,7 @@
             @endforelse
 
             <h2 class="section-title">Payment</h2>
-            <div class="info-panel bottom-space">
+            <div class="info-panel bottom-space order-create-total-panel">
                 <div class="muted">Total Amount</div>
                 <div class="metric" data-total-amount>PHP 0.00</div>
                 <div class="muted" data-payment-message>Enter the amount paid by the customer.</div>
@@ -88,9 +90,70 @@
                     <option value="other" @selected(old('payment_method') === 'other')>Other</option>
                 </select>
             </div>
-            <button class="btn" type="submit">Create Order</button>
+            <button class="btn order-create-submit" type="submit">Create Order</button>
         </div>
     </form>
+    <style>
+        .order-create-form {
+            align-items: start;
+        }
+
+        .order-create-card {
+            min-width: 0;
+        }
+
+        .order-create-summary-grid {
+            display: grid;
+            gap: 12px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .order-create-addon {
+            align-items: flex-start;
+            padding: 12px 14px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            background: color-mix(in srgb, var(--color-surface) 84%, var(--color-brand-light));
+        }
+
+        .order-create-addon span {
+            flex: 1;
+            line-height: 1.4;
+        }
+
+        .order-create-total-panel .metric {
+            font-size: clamp(1.85rem, 4vw, var(--text-2xl));
+        }
+
+        .order-create-submit {
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 900px) {
+            .order-create-form {
+                gap: 14px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .order-create-summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .order-create-card h2 {
+                margin-bottom: 14px;
+            }
+
+            .order-create-addon {
+                padding: 12px;
+            }
+
+            .order-create-total-panel {
+                padding: 16px;
+            }
+        }
+    </style>
     <script>
         const weightInput = document.querySelector('[data-weight-input]');
         const priceInput = document.querySelector('[data-price-per-load]');

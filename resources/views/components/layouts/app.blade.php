@@ -251,6 +251,24 @@
             .grid-4, .grid-2 { grid-template-columns: 1fr; }
             .main { padding: 18px; }
         }
+        @media (max-width: 640px) {
+            .main { padding: 12px; }
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 16px;
+                margin-bottom: 16px;
+            }
+            h1 { font-size: clamp(1.45rem, 6vw, var(--text-2xl)); }
+            .card { padding: 16px; }
+            table {
+                display: block;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            th, td { padding: 12px 10px; }
+            .search-field, .filter-field { max-width: none; }
+        }
     </style>
 </head>
 <body>
