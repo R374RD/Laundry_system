@@ -95,18 +95,16 @@
 
         .shell {
             position: relative;
-            display: grid;
-            grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
             min-height: 100vh;
-            transition: grid-template-columns var(--transition-slow);
         }
 
         .sidebar {
-            position: sticky;
-            top: 0;
+            position: fixed;
+            inset: 0 auto 0 0;
             z-index: 40;
+            width: var(--sidebar-width);
             height: 100vh;
-            overflow-y: auto;
+            overflow: hidden;
             color: var(--color-on-brand);
             padding: 24px 18px;
             background: linear-gradient(180deg, var(--color-brand), var(--color-sidebar));
@@ -128,7 +126,9 @@
         }
 
         .sidebar-inner {
-            min-height: calc(100vh - 48px);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
         }
 
         .sidebar-backdrop {
@@ -277,8 +277,9 @@
 
         .main {
             min-width: 0;
+            margin-left: var(--sidebar-width);
             padding: 30px;
-            transition: padding var(--transition-base);
+            transition: margin-left var(--transition-slow), padding var(--transition-base);
         }
 
         .topbar {
@@ -556,13 +557,14 @@
         .checkbox-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
         .checkbox-row input { width: auto; }
 
-        body.sidebar-collapsed .shell {
-            grid-template-columns: var(--sidebar-collapsed-width) minmax(0, 1fr);
-        }
-
         body.sidebar-collapsed .sidebar {
+            width: var(--sidebar-collapsed-width);
             padding-left: 14px;
             padding-right: 14px;
+        }
+
+        body.sidebar-collapsed .main {
+            margin-left: var(--sidebar-collapsed-width);
         }
 
         body.sidebar-collapsed .brand-wrap {
@@ -620,7 +622,7 @@
             }
 
             .shell {
-                grid-template-columns: minmax(0, 1fr);
+                min-height: 100vh;
             }
 
             .sidebar {
@@ -646,6 +648,7 @@
             }
 
             .main {
+                margin-left: 0;
                 padding: 18px;
             }
 
