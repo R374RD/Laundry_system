@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Pricing;
 
 class Order extends Model
 {
@@ -24,7 +25,8 @@ class Order extends Model
         'customer_contact',
         'customer_email',
         'weight_kg',
-        'price_per_kilo',
+        'load_count',
+        'base_price_per_load',
         'subtotal',
         'add_on_total',
         'total_amount',
@@ -36,13 +38,15 @@ class Order extends Model
 
     protected $casts = [
         'weight_kg' => 'decimal:2',
-        'price_per_kilo' => 'decimal:2',
+        'load_count' => 'decimal:2',
+        'base_price_per_load' => 'decimal:2',
         'subtotal' => 'decimal:2',
         'add_on_total' => 'decimal:2',
         'total_amount' => 'decimal:2',
         'paid_amount' => 'decimal:2',
     ];
 
+    // RELATIONSHIPS
     public function branch()
     {
         return $this->belongsTo(Branch::class);
@@ -60,7 +64,9 @@ class Order extends Model
 
     public function addOns()
     {
-        return $this->belongsToMany(AddOnService::class, 'order_add_on')->withPivot('price')->withTimestamps();
+        return $this->belongsToMany(AddOnService::class, 'order_add_on')
+            ->withPivot('price')
+            ->withTimestamps();
     }
 
     public function payments()
@@ -71,5 +77,15 @@ class Order extends Model
     public function balance(): float
     {
         return max(0, (float) $this->total_amount - (float) $this->paid_amount);
+    }
+
+    // BUSINESS LOGIC (NOW CORRECTLY INSIDE CLASS)
+    public function calculateTotalFromWeight($weight)
+    {
+        $pricing = Pricing::where('is_active', true)->firstOrFail();
+
+        $loads = ceil($weight / $pricing->max_kilo_per_load);
+
+        return $loads * $pricing->price_per_load;
     }
 }

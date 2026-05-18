@@ -67,14 +67,17 @@ class OrderController extends Controller
         $pricing = Pricing::where('is_active', true)->latest()->firstOrFail();
         $selectedAddOns = AddOnService::whereIn('id', $data['add_ons'] ?? [])->get();
 
-        $subtotal = round($data['weight_kg'] * $pricing->price_per_kilo, 2);
+        $pricePerLoad = (float) $pricing->price_per_load;
+        $maxKiloPerLoad = max((float) $pricing->max_kilo_per_load, 0.01);
+        $loadCount = (int) ceil($data['weight_kg'] / $maxKiloPerLoad);
+        $subtotal = round($loadCount * $pricePerLoad, 2);
         $addOnTotal = $selectedAddOns->sum('price');
         $total = $subtotal + $addOnTotal;
         $paymentAmount = $this->resolveInitialPayment($data, $total);
         $branchId = Auth::user()->isStaff() ? Auth::user()->branch_id : $data['branch_id'];
         $customerEmail = $data['customer_email'] ?? null;
 
-        $order = DB::transaction(function () use ($data, $pricing, $selectedAddOns, $subtotal, $addOnTotal, $total, $paymentAmount, $branchId, $customerEmail) {
+        $order = DB::transaction(function () use ($data, $selectedAddOns, $loadCount, $pricePerLoad, $subtotal, $addOnTotal, $total, $paymentAmount, $branchId, $customerEmail) {
             $order = Order::create([
                 'order_number' => 'ORD-' . now()->format('Ymd') . '-' . str_pad((string) (Order::max('id') + 1), 4, '0', STR_PAD_LEFT),
                 'branch_id' => $branchId,
@@ -84,7 +87,8 @@ class OrderController extends Controller
                 'customer_contact' => $data['customer_contact'] ?? null,
                 'customer_email' => $customerEmail,
                 'weight_kg' => $data['weight_kg'],
-                'price_per_kilo' => $pricing->price_per_kilo,
+                'load_count' => $loadCount,
+                'base_price_per_load' => $pricePerLoad,
                 'subtotal' => $subtotal,
                 'add_on_total' => $addOnTotal,
                 'total_amount' => $total,

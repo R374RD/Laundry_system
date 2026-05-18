@@ -99,7 +99,7 @@
 
         <div class="line"></div>
         <div class="row">
-            <span>Laundry {{ $order->weight_kg }} kg x PHP {{ number_format($order->price_per_kilo, 2) }}</span>
+            <span>Laundry {{ number_format($order->weight_kg, 2) }} kg ({{ rtrim(rtrim(number_format($order->load_count, 2), '0'), '.') }} load(s) x PHP {{ number_format($order->base_price_per_load, 2) }})</span>
             <span>PHP {{ number_format($order->subtotal, 2) }}</span>
         </div>
         @foreach($order->addOns as $addOn)

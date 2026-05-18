@@ -12,7 +12,8 @@
                 <tr><th>Customer Email</th><td>{{ $order->customer_email ?: 'N/A' }}</td></tr>
                 <tr><th>Branch</th><td>{{ $order->branch->name }}</td></tr>
                 <tr><th>Created By</th><td>{{ $order->user->name }}</td></tr>
-                <tr><th>Weight</th><td>{{ $order->weight_kg }} kg x PHP {{ number_format($order->price_per_kilo, 2) }}</td></tr>
+                <tr><th>Weight</th><td>{{ number_format($order->weight_kg, 2) }} kg</td></tr>
+                <tr><th>Laundry Charge</th><td>{{ rtrim(rtrim(number_format($order->load_count, 2), '0'), '.') }} load(s) x PHP {{ number_format($order->base_price_per_load, 2) }}</td></tr>
                 <tr><th>Add-ons</th><td>
                     @forelse($order->addOns as $addOn)
                         <div>{{ $addOn->name }} - PHP {{ number_format($addOn->pivot->price, 2) }}</div>

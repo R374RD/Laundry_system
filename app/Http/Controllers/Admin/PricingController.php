@@ -25,18 +25,30 @@ class PricingController extends Controller
         abort_unless(Auth::user()->isAdmin(), 403);
 
         $data = $request->validate([
-            'price_per_kilo' => ['required', 'numeric', 'min:1'],
+            'price_per_load' => ['required', 'numeric', 'min:1'],
+            'max_kilo_per_load' => ['required', 'numeric', 'min:1'],
         ]);
 
-        Pricing::query()->update(['is_active' => false]);
-        Pricing::create(['price_per_kilo' => $data['price_per_kilo'], 'is_active' => true]);
+        // deactivate old pricing
+        Pricing::where('is_active', true)->update([
+            'is_active' => false
+        ]);
+
+        // create new active pricing
+        $pricing = Pricing::create([
+            'price_per_load' => $data['price_per_load'],
+            'max_kilo_per_load' => $data['max_kilo_per_load'],
+            'is_active' => true
+        ]);
 
         ActivityLog::create([
             'user_id' => Auth::id(),
             'action' => 'Updated global pricing',
-            'details' => 'New price per kilo: ' . number_format($data['price_per_kilo'], 2),
+            'details' =>
+                'New price per load: ' . number_format($pricing->price_per_load, 2) .
+                ' | Max KG: ' . number_format($pricing->max_kilo_per_load, 2)
         ]);
 
-        return back()->with('success', 'Global price updated.');
+        return back()->with('success', 'Global pricing updated.');
     }
 }

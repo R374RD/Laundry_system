@@ -22,7 +22,10 @@ class DatabaseSeeder extends Seeder
         $north = Branch::firstOrCreate(['name' => 'North Branch'], ['address' => 'Branch 2']);
         $south = Branch::firstOrCreate(['name' => 'South Branch'], ['address' => 'Branch 3']);
 
-        Pricing::firstOrCreate(['is_active' => true], ['price_per_kilo' => 55]);
+        Pricing::firstOrCreate(['is_active' => true], [
+            'price_per_load' => 55,
+            'max_kilo_per_load' => 8,
+        ]);
 
         foreach ([
             ['name' => 'Fabric Conditioner', 'price' => 20],

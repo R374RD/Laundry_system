@@ -34,10 +34,15 @@
             <div class="field">
                 <label>Weight in Kilos</label>
                 <input type="number" step="0.01" min="0.1" name="weight_kg" value="{{ old('weight_kg') }}" data-weight-input required>
+                <div class="muted">1 load covers up to {{ number_format(optional($pricing)->max_kilo_per_load ?? 0, 2) }} kg.</div>
             </div>
             <div class="field">
-                <label>Price Per Kilo</label>
-                <input value="PHP {{ number_format(optional($pricing)->price_per_kilo ?? 0, 2) }}" data-price-per-kilo="{{ optional($pricing)->price_per_kilo ?? 0 }}" disabled>
+                <label>Price Per Load</label>
+                <input value="PHP {{ number_format(optional($pricing)->price_per_load ?? 0, 2) }}" data-price-per-load="{{ optional($pricing)->price_per_load ?? 0 }}" data-max-kilo-per-load="{{ optional($pricing)->max_kilo_per_load ?? 0 }}" disabled>
+            </div>
+            <div class="field">
+                <label>Estimated Loads</label>
+                <input value="0" data-load-count disabled>
             </div>
             <div class="field">
                 <label>Notes</label>
@@ -88,13 +93,15 @@
     </form>
     <script>
         const weightInput = document.querySelector('[data-weight-input]');
-        const priceInput = document.querySelector('[data-price-per-kilo]');
+        const priceInput = document.querySelector('[data-price-per-load]');
+        const loadCountInput = document.querySelector('[data-load-count]');
         const addOnInputs = document.querySelectorAll('[data-add-on-price]');
         const totalAmount = document.querySelector('[data-total-amount]');
         const paymentType = document.querySelector('[data-payment-type]');
         const paymentAmount = document.querySelector('[data-payment-amount]');
         const paymentMessage = document.querySelector('[data-payment-message]');
-        const pricePerKilo = Number(priceInput?.dataset.pricePerKilo || 0);
+        const pricePerLoad = Number(priceInput?.dataset.pricePerLoad || 0);
+        const maxKiloPerLoad = Number(priceInput?.dataset.maxKiloPerLoad || 0);
         const peso = new Intl.NumberFormat('en-PH', {
             style: 'currency',
             currency: 'PHP',
@@ -102,13 +109,19 @@
 
         function updateTotal() {
             const weight = Number(weightInput?.value || 0);
+            const loadCount = weight > 0 && maxKiloPerLoad > 0
+                ? Math.ceil(weight / maxKiloPerLoad)
+                : 0;
             const addOnTotal = Array.from(addOnInputs).reduce((total, addOn) => {
                 return addOn.checked ? total + Number(addOn.dataset.addOnPrice || 0) : total;
             }, 0);
 
-            const total = (weight * pricePerKilo) + addOnTotal;
+            const total = (loadCount * pricePerLoad) + addOnTotal;
             const paid = Number(paymentAmount?.value || 0);
 
+            if (loadCountInput) {
+                loadCountInput.value = loadCount;
+            }
             totalAmount.textContent = peso.format(total);
 
             if (paymentType?.value === 'none') {

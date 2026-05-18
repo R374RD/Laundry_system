@@ -48,4 +48,11 @@ class AddOnController extends Controller
 
         return back()->with('success', 'Add-on service updated.');
     }
+
+    public function destroy(AddOnService $addOn)
+{
+    $addOn->delete();
+
+    return back()->with('success', 'Service deleted successfully.');
+}
 }
