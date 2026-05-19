@@ -1,6 +1,11 @@
 [build]
+<<<<<<< HEAD
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
+=======
+builder = "RAILPACK"
+buildCommand = "npm install && npm run build"
+>>>>>>> 411a8ae4dcbbd089eca0266c6c92c7e5e6c963a1
 
 [deploy]
 healthcheckPath = "/login"
