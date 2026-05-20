@@ -3,6 +3,7 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
+preDeployCommand = "sh -lc 'for i in $(seq 1 24); do php artisan migrate --force && exit 0; echo waiting for mysql; sleep 5; done; exit 1'"
 healthcheckPath = "/up"
 healthcheckTimeout = 120
 restartPolicyType = "ON_FAILURE"

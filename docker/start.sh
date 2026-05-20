@@ -16,25 +16,6 @@ if [ ! -L public/storage ]; then
     php artisan storage:link || true
 fi
 
-if [ "${DB_CONNECTION:-}" = "mysql" ] && [ -n "${DB_HOST:-}" ]; then
-    echo "Waiting for MySQL at ${DB_HOST}:${DB_PORT:-3306}..."
-    i=1
-    while [ "$i" -le 24 ]; do
-        if php artisan migrate --force; then
-            break
-        fi
-
-        if [ "$i" -eq 24 ]; then
-            echo "MySQL did not become ready in time."
-            exit 1
-        fi
-
-        echo "MySQL not ready yet, retrying in 5 seconds..."
-        i=$((i + 1))
-        sleep 5
-    done
-fi
-
 php artisan config:cache
 
 if ! php artisan route:cache; then
