@@ -25,18 +25,4 @@ fi
 
 php artisan view:cache
 
-attempt=1
-max_attempts="${DB_WAIT_MAX_ATTEMPTS:-20}"
-
-until php artisan migrate --force; do
-    if [ "$attempt" -ge "$max_attempts" ]; then
-        echo "Database migrations failed after ${max_attempts} attempts."
-        exit 1
-    fi
-
-    echo "Migration attempt ${attempt}/${max_attempts} failed. Retrying in 3 seconds..."
-    attempt=$((attempt + 1))
-    sleep 3
-done
-
 exec php artisan serve --host=0.0.0.0 --port="${PORT:-8080}"
