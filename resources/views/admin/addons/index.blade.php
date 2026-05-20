@@ -68,8 +68,12 @@
 
                             {{-- DELETE FORM --}}
                             <td>
-                                <form method="POST" action="{{ route('admin.addons.destroy', $addOn) }}"
-                                      onsubmit="return confirm('Delete this service? This cannot be undone.')">
+                                <form method="POST"
+                                      action="{{ route('admin.addons.destroy', $addOn) }}"
+                                      data-confirmable
+                                      data-confirm-title="Delete Service"
+                                      data-confirm-message="You are about to delete this service. This cannot be undone. Are you sure?"
+                                      data-confirm-action="Delete Service">
                                     @csrf
                                     @method('DELETE')
 

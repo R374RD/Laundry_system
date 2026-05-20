@@ -35,7 +35,12 @@
                             <td>{{ $branch->orders_count }}</td>
                             <td class="actions">
                                 <button class="btn light" form="branch-{{ $branch->id }}" type="submit">Save</button>
-                                <form method="POST" action="{{ route('admin.branches.destroy', $branch) }}" onsubmit="return confirm('Delete this branch? Only empty branches can be deleted.');">
+                                <form method="POST"
+                                      action="{{ route('admin.branches.destroy', $branch) }}"
+                                      data-confirmable
+                                      data-confirm-title="Delete Branch"
+                                      data-confirm-message="You are about to delete this branch. Only empty branches can be deleted. Are you sure?"
+                                      data-confirm-action="Delete Branch">
                                     @csrf
                                     @method('DELETE')
                                     <button class="btn secondary" type="submit">Delete</button>

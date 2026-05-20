@@ -45,7 +45,10 @@
 
                                     <form method="POST"
                                           action="{{ route('admin.users.destroy', $pending) }}"
-                                          onsubmit="return confirm('Delete this signup request?');">
+                                          data-confirmable
+                                          data-confirm-title="Delete Signup Request"
+                                          data-confirm-message="You are about to delete this signup request. Are you sure?"
+                                          data-confirm-action="Delete Request">
                                         @csrf
                                         @method('DELETE')
                                         <button class="btn light">Delete</button>
@@ -202,7 +205,10 @@
 
                                             <form method="POST"
                                                   action="{{ route('admin.users.destroy', $user) }}"
-                                                  onsubmit="return confirm('Delete this user?')">
+                                                  data-confirmable
+                                                  data-confirm-title="Delete User"
+                                                  data-confirm-message="You are about to delete this user. Are you sure?"
+                                                  data-confirm-action="Delete User">
                                                 @csrf
                                                 @method('DELETE')
 

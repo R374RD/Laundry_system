@@ -502,6 +502,8 @@
 
         .btn.secondary { background: var(--color-text-secondary); box-shadow: none; }
         .btn.light { background: var(--color-brand-light); color: var(--color-brand-dark); box-shadow: none; border: 1px solid var(--color-border-strong); }
+        .btn.danger { background: var(--color-danger-text); color: var(--color-on-brand); box-shadow: none; }
+        .btn.danger:hover { background: color-mix(in srgb, var(--color-danger-text) 86%, black); }
         .actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 
         .badge {
@@ -529,6 +531,104 @@
 
         .alert.success { background: var(--color-success-bg); color: var(--color-success-text); }
         .alert.error { background: var(--color-danger-bg); color: var(--color-danger-text); }
+
+        body.confirm-open {
+            overflow: hidden;
+        }
+
+        .confirm-modal[hidden] {
+            display: none;
+        }
+
+        .confirm-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 90;
+            display: grid;
+            place-items: center;
+            padding: 20px;
+        }
+
+        .confirm-modal-scrim {
+            position: absolute;
+            inset: 0;
+            background: rgba(10, 18, 14, 0.6);
+            backdrop-filter: blur(3px);
+        }
+
+        .confirm-modal-dialog {
+            position: relative;
+            width: min(100%, 440px);
+            padding: 24px;
+            border: 1px solid color-mix(in srgb, var(--color-danger-text) 18%, var(--color-border));
+            border-radius: var(--radius-xl);
+            background: linear-gradient(180deg, var(--color-surface), color-mix(in srgb, var(--color-warning-bg) 30%, var(--color-surface)));
+            box-shadow: var(--shadow-lg);
+            display: grid;
+            gap: 18px;
+        }
+
+        .confirm-modal-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+
+        .confirm-modal-icon {
+            width: 54px;
+            height: 54px;
+            flex: 0 0 54px;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            background: var(--color-warning-bg);
+            color: var(--color-warning-text);
+            border: 1px solid color-mix(in srgb, var(--color-warning-text) 18%, transparent);
+            box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-on-brand) 35%, transparent);
+        }
+
+        .confirm-modal-icon svg {
+            width: 26px;
+            height: 26px;
+            display: block;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .confirm-modal-copy {
+            min-width: 0;
+        }
+
+        .confirm-modal-kicker {
+            margin: 0 0 4px;
+            color: var(--color-warning-text);
+            font-size: var(--text-xs);
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .confirm-modal-title {
+            margin: 0;
+            font-size: var(--text-xl);
+            line-height: 1.15;
+        }
+
+        .confirm-modal-message {
+            margin: 8px 0 0;
+            color: var(--color-text-secondary);
+            line-height: 1.55;
+        }
+
+        .confirm-modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
 
         .login {
             min-height: 100vh;
@@ -724,6 +824,22 @@
             .actions {
                 align-items: stretch;
             }
+
+            .confirm-modal-dialog {
+                padding: 20px;
+            }
+
+            .confirm-modal-header {
+                align-items: flex-start;
+            }
+
+            .confirm-modal-actions {
+                flex-direction: column-reverse;
+            }
+
+            .confirm-modal-actions .btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -894,7 +1010,13 @@
                         <span class="nav-label">Change Password</span>
                     </a>
 
-                    <form method="POST" action="{{ route('logout') }}" class="logout-form" onsubmit="return confirm('Are you sure you want to log out? Unsaved progress will be discarded.');">
+                    <form method="POST"
+                          action="{{ route('logout') }}"
+                          class="logout-form"
+                          data-confirmable
+                          data-confirm-title="Confirm Logout"
+                          data-confirm-message="You are about to log out. Are you sure?"
+                          data-confirm-action="Log Out">
                         @csrf
                         <button class="logout" data-title="Logout" title="Logout" type="submit">
                             <span class="nav-icon" aria-hidden="true">
@@ -940,6 +1062,38 @@
             {{ $slot }}
         </main>
     </div>
+
+    <div class="confirm-modal" data-confirm-modal hidden>
+        <div class="confirm-modal-scrim" data-confirm-cancel></div>
+
+        <div class="confirm-modal-dialog"
+             role="alertdialog"
+             aria-modal="true"
+             aria-labelledby="confirm-modal-title"
+             aria-describedby="confirm-modal-message"
+             tabindex="-1">
+            <div class="confirm-modal-header">
+                <div class="confirm-modal-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 3 21 19H3L12 3Z"></path>
+                        <path d="M12 9v4"></path>
+                        <path d="M12 17h.01"></path>
+                    </svg>
+                </div>
+
+                <div class="confirm-modal-copy">
+                    <p class="confirm-modal-kicker">Warning</p>
+                    <h2 class="confirm-modal-title" id="confirm-modal-title">Confirm Action</h2>
+                    <p class="confirm-modal-message" id="confirm-modal-message">You are about to continue. Are you sure?</p>
+                </div>
+            </div>
+
+            <div class="confirm-modal-actions">
+                <button class="btn light" type="button" data-confirm-cancel>Cancel</button>
+                <button class="btn danger" type="button" data-confirm-accept>Continue</button>
+            </div>
+        </div>
+    </div>
 @else
     {{ $slot }}
 @endauth
@@ -952,77 +1106,172 @@
 
     document.addEventListener('DOMContentLoaded', function () {
         const body = document.body;
-        const sidebar = document.querySelector('[data-app-sidebar]');
-        const toggleButton = document.querySelector('[data-sidebar-toggle]');
-        const backdrop = document.querySelector('[data-sidebar-backdrop]');
-        const navLinks = document.querySelectorAll('[data-sidebar-link]');
 
-        if (!sidebar || !toggleButton) {
-            return;
-        }
+        function initSidebar() {
+            const sidebar = document.querySelector('[data-app-sidebar]');
+            const toggleButton = document.querySelector('[data-sidebar-toggle]');
+            const backdrop = document.querySelector('[data-sidebar-backdrop]');
+            const navLinks = document.querySelectorAll('[data-sidebar-link]');
 
-        const mobileBreakpoint = window.matchMedia('(max-width: 900px)');
-        const storageKey = 'badeth-sidebar-collapsed';
-        let desktopCollapsed = localStorage.getItem(storageKey) === 'true';
+            if (!sidebar || !toggleButton) {
+                return;
+            }
 
-        function setExpandedState(isExpanded) {
-            toggleButton.setAttribute('aria-expanded', String(isExpanded));
-            sidebar.setAttribute('aria-hidden', mobileBreakpoint.matches ? String(!isExpanded) : 'false');
+            const mobileBreakpoint = window.matchMedia('(max-width: 900px)');
+            const storageKey = 'badeth-sidebar-collapsed';
+            let desktopCollapsed = localStorage.getItem(storageKey) === 'true';
+
+            function setExpandedState(isExpanded) {
+                toggleButton.setAttribute('aria-expanded', String(isExpanded));
+                sidebar.setAttribute('aria-hidden', mobileBreakpoint.matches ? String(!isExpanded) : 'false');
+
+                if (backdrop) {
+                    backdrop.setAttribute('aria-hidden', String(!body.classList.contains('sidebar-open')));
+                }
+            }
+
+            function closeMobileSidebar() {
+                body.classList.remove('sidebar-open');
+                setExpandedState(false);
+            }
+
+            function applySidebarState() {
+                if (mobileBreakpoint.matches) {
+                    body.classList.remove('sidebar-collapsed');
+                    setExpandedState(body.classList.contains('sidebar-open'));
+                    return;
+                }
+
+                body.classList.remove('sidebar-open');
+                body.classList.toggle('sidebar-collapsed', desktopCollapsed);
+                setExpandedState(!desktopCollapsed);
+            }
+
+            toggleButton.addEventListener('click', function () {
+                if (mobileBreakpoint.matches) {
+                    body.classList.toggle('sidebar-open');
+                    setExpandedState(body.classList.contains('sidebar-open'));
+                    return;
+                }
+
+                desktopCollapsed = !desktopCollapsed;
+                localStorage.setItem(storageKey, String(desktopCollapsed));
+                applySidebarState();
+            });
 
             if (backdrop) {
-                backdrop.setAttribute('aria-hidden', String(!body.classList.contains('sidebar-open')));
-            }
-        }
-
-        function closeMobileSidebar() {
-            body.classList.remove('sidebar-open');
-            setExpandedState(false);
-        }
-
-        function applySidebarState() {
-            if (mobileBreakpoint.matches) {
-                body.classList.remove('sidebar-collapsed');
-                setExpandedState(body.classList.contains('sidebar-open'));
-                return;
+                backdrop.addEventListener('click', closeMobileSidebar);
             }
 
-            body.classList.remove('sidebar-open');
-            body.classList.toggle('sidebar-collapsed', desktopCollapsed);
-            setExpandedState(!desktopCollapsed);
-        }
+            navLinks.forEach(function (link) {
+                link.addEventListener('click', function () {
+                    if (mobileBreakpoint.matches) {
+                        closeMobileSidebar();
+                    }
+                });
+            });
 
-        toggleButton.addEventListener('click', function () {
-            if (mobileBreakpoint.matches) {
-                body.classList.toggle('sidebar-open');
-                setExpandedState(body.classList.contains('sidebar-open'));
-                return;
-            }
-
-            desktopCollapsed = !desktopCollapsed;
-            localStorage.setItem(storageKey, String(desktopCollapsed));
-            applySidebarState();
-        });
-
-        if (backdrop) {
-            backdrop.addEventListener('click', closeMobileSidebar);
-        }
-
-        navLinks.forEach(function (link) {
-            link.addEventListener('click', function () {
-                if (mobileBreakpoint.matches) {
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape' && mobileBreakpoint.matches && body.classList.contains('sidebar-open')) {
                     closeMobileSidebar();
                 }
             });
-        });
 
-        document.addEventListener('keydown', function (event) {
-            if (event.key === 'Escape' && mobileBreakpoint.matches && body.classList.contains('sidebar-open')) {
-                closeMobileSidebar();
+            mobileBreakpoint.addEventListener('change', applySidebarState);
+            applySidebarState();
+        }
+
+        function initConfirmModal() {
+            const modal = document.querySelector('[data-confirm-modal]');
+
+            if (!modal) {
+                return;
             }
-        });
 
-        mobileBreakpoint.addEventListener('change', applySidebarState);
-        applySidebarState();
+            const dialog = modal.querySelector('.confirm-modal-dialog');
+            const title = modal.querySelector('#confirm-modal-title');
+            const message = modal.querySelector('#confirm-modal-message');
+            const acceptButton = modal.querySelector('[data-confirm-accept]');
+            const cancelButtons = modal.querySelectorAll('[data-confirm-cancel]');
+            const forms = document.querySelectorAll('form[data-confirmable]');
+            const defaultTitle = title.textContent;
+            const defaultMessage = message.textContent;
+            const defaultAction = acceptButton.textContent;
+            let pendingForm = null;
+            let lastFocusedElement = null;
+
+            function closeModal() {
+                modal.hidden = true;
+                body.classList.remove('confirm-open');
+                pendingForm = null;
+                title.textContent = defaultTitle;
+                message.textContent = defaultMessage;
+                acceptButton.textContent = defaultAction;
+
+                if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
+                    lastFocusedElement.focus();
+                }
+
+                lastFocusedElement = null;
+            }
+
+            function openModal(form) {
+                pendingForm = form;
+                lastFocusedElement = document.activeElement;
+                title.textContent = form.dataset.confirmTitle || defaultTitle;
+                message.textContent = form.dataset.confirmMessage || defaultMessage;
+                acceptButton.textContent = form.dataset.confirmAction || defaultAction;
+                modal.hidden = false;
+                body.classList.add('confirm-open');
+
+                window.requestAnimationFrame(function () {
+                    dialog.focus();
+                });
+            }
+
+            forms.forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (form.dataset.confirmed === 'true') {
+                        delete form.dataset.confirmed;
+                        return;
+                    }
+
+                    event.preventDefault();
+                    openModal(form);
+                });
+            });
+
+            cancelButtons.forEach(function (button) {
+                button.addEventListener('click', closeModal);
+            });
+
+            acceptButton.addEventListener('click', function () {
+                if (!pendingForm) {
+                    return;
+                }
+
+                const formToSubmit = pendingForm;
+                formToSubmit.dataset.confirmed = 'true';
+                closeModal();
+
+                if (typeof formToSubmit.requestSubmit === 'function') {
+                    formToSubmit.requestSubmit();
+                    return;
+                }
+
+                formToSubmit.submit();
+            });
+
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape' && !modal.hidden) {
+                    event.preventDefault();
+                    closeModal();
+                }
+            });
+        }
+
+        initSidebar();
+        initConfirmModal();
     });
 </script>
 </body>
